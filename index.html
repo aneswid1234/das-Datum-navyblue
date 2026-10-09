@@ -4,9 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Notion German Date Widget</title>
-    <!-- Menggunakan Google Font yang mirip gaya tulisan tangan di gambar -->
-    <link href="https://fonts.googleapis.com/css2?family=Balsamiq+Sans:wght@700&display=swap" rel="stylesheet">
     <style>
+        @font-face {
+            font-family: 'Spicy Wasabi';
+            src: url('SpicyWasabi.ttf') format('truetype');
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -14,69 +17,112 @@
         }
 
         body {
-            /* Transparan agar menyatu rapi dengan background Notion */
             background-color: transparent; 
             display: flex;
             justify-content: center;
             align-items: center;
+            width: 100vw;
             height: 100vh;
             overflow: hidden;
-            /* Mencegah teks turun ke bawah (wajib 1 baris) */
-            white-space: nowrap; 
+            color: #0d238a; 
+            font-family: 'Spicy Wasabi', cursive, sans-serif;
         }
 
         #widget-container {
-            font-family: 'Balsamiq Sans', cursive, sans-serif;
-            /* Warna biru tua sesuai contoh gambar */
-            color: #0d238a; 
-            /* Ukuran font responsif agar aman untuk teks terpanjang sekalipun */
-            font-size: clamp(1rem, 2.5vw, 1.8rem); 
-            letter-spacing: 0.5px;
-            padding: 10px;
+            width: 100%;
+            text-align: center;
+            padding: 0 10px;
+        }
+
+        /* Ukuran huruf besar & di tengah */
+        #main-date {
+            font-size: clamp(1.6rem, 3.8vw, 2.8rem);
+            white-space: nowrap;
+            margin-bottom: 10px;
+        }
+
+        #date-read {
+            font-size: clamp(1.1rem, 2.5vw, 1.9rem);
+            white-space: nowrap;
+            opacity: 0.85;
+            margin-bottom: 6px;
+        }
+
+        #time-read {
+            font-size: clamp(1rem, 2.2vw, 1.7rem);
+            white-space: nowrap;
+            opacity: 0.8;
         }
     </style>
 </head>
 <body>
 
     <div id="widget-container">
-        <span id="date-text">Lade Datum...</span>
+        <div id="main-date"><span id="date-text">Lade...</span></div>
+        <div id="date-read"><span id="date-read-text"></span></div>
+        <div id="time-read"><span id="time-read-text"></span></div>
     </div>
 
     <script>
-        function updateWidget() {
-            const now = new Date();
+        const numbersOrdinal = ["", "erste", "zweite", "dritte", "vierte", "fünfte", "sechste", "siebte", "achte", "neunte", "zehnte", "elfte", "zwölfte", "dreizehnte", "vierzehnte", "fünfzehnte", "sechzehnte", "siebzehnte", "achtzehnte", "neunzehnte", "zwanzigste", "einundzwanzigste", "zweiundzwanzigste", "dreiundzwanzigste", "vierundzwanzigste", "fünfundzwanzigste", "sechsundzwanzigste", "siebenundzwanzigste", "achtundzwanzigste", "neunundzwanzigste", "dreißigste", "einunddreißigste"];
 
-            // Format Hari (Contoh: Freitag)
-            const optionsWeekday = { weekday: 'long' };
-            const weekday = now.toLocaleDateString('de-DE', optionsWeekday);
+        const numbersCard = ["null", "eins", "zwei", "drei", "vier", "fünf", "sechs", "sieben", "acht", "neun", "zehn", "elf", "zwölf", "dreizehn", "vierzehn", "fünfzehn", "sechzehn", "siebzehn", "achtzehn", "neunzehn", "zwanzig", "einundzwanzig", "zweiundzwanzig", "dreiundzwanzig", "vierundzwanzig", "fünfundzwanzig", "sechsundzwanzig", "siebenundzwanzig", "achtundzwanzig", "neunundzwanzig", "dreißig", "einunddreißig", "zweiunddreißig", "dreiunddreißig", "vierunddreißig", "fünfunddreißig", "sechsunddreißig", "siebenunddreißig", "achtunddreißig", "neununddreißig", "vierzig", "einundvierzig", "zweiundvierzig", "dreiundvierzig", "vierundvierzig", "fünfundvierzig", "sechsundvierzig", "siebenundvierzig", "achtundvierzig", "neunundvierzig", "fünfzig", "einundfünfzig", "zweiundfünfzig", "dreiundfünfzig", "vierundfünfzig", "fünfundfünfzig", "sechsundfünfzig", "siebenundfünfzig", "achtundfünfzig", "neunundfünfzig"];
 
-            // Format Tanggal (Angka)
-            const day = now.getDate();
+        function getGermanTimeRead(hours, minutes) {
+            let formal = `${numbersCard[hours]} Uhr`;
+            if (minutes > 0) formal += ` ${numbersCard[minutes]}`;
 
-            // Format Bulan (Contoh: Oktober / Dezember)
-            const optionsMonth = { month: 'long' };
-            const month = now.toLocaleDateString('de-DE', optionsMonth);
+            let informal = "";
+            let h12 = hours % 12;
+            let nextH12 = (h12 + 1) % 12;
+            if (nextH12 === 0) nextH12 = 12;
 
-            // Format Tahun
-            const year = now.getFullYear();
-
-            // Format Jam & Menit
-            const hours = String(now.getHours()).padStart(2, '0');
-            const minutes = String(now.getMinutes()).padStart(2, '0');
-
-            // Menggabungkan sesuai format bahasa Jerman di gambar: "am Freitag, dem 9. Oktober 2026 um 14:30 Uhr"
-            const finalString = `am ${weekday}, dem ${day}. ${month} ${year} um ${hours}:${minutes} Uhr`;
-
-            // Masukkan ke dalam HTML
-            document.getElementById('date-text').innerText = finalString;
+            if (minutes === 0) {
+                informal = `${numbersCard[hours]} Uhr`;
+            } else if (minutes === 15) {
+                informal = `Viertel nach ${numbersCard[h12 === 0 ? 12 : h12]}`;
+            } else if (minutes === 30) {
+                informal = `halb ${numbersCard[nextH12]}`;
+            } else if (minutes === 45) {
+                informal = `Viertel vor ${numbersCard[nextH12]}`;
+            } else if (minutes < 30) {
+                informal = `${numbersCard[minutes]} nach ${numbersCard[h12 === 0 ? 12 : h12]}`;
+            } else {
+                let diff = 60 - minutes;
+                informal = `${numbersCard[diff]} vor ${numbersCard[nextH12]}`;
+            }
+            return { formal, informal };
         }
 
-        // Jalankan saat pertama kali dibuka
-        updateWidget();
+        function updateWidget() {
+            const now = new Date();
+            const weekday = now.toLocaleDateString('de-DE', { weekday: 'long' });
+            const day = now.getDate();
+            const monthName = now.toLocaleDateString('de-DE', { month: 'long' });
+            const year = now.getFullYear();
+            const hours = now.getHours();
+            const minutes = now.getMinutes();
 
-        // Update otomatis setiap detik (supaya jamnya jalan terus)
+            const timeStr = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+            const mainString = `am ${weekday}, dem ${day}. ${monthName} ${year} um ${timeStr} Uhr`;
+            document.getElementById('date-text').innerText = mainString;
+
+            let dayRead = numbersOrdinal[day] || day;
+            if (day === 1) dayRead = "ersten";
+            else if (day === 3) dayRead = "dritten";
+            else if (day === 7) dayRead = "siebten";
+            else if (day === 8) dayRead = "achten";
+            else if (!dayRead.endsWith('n')) dayRead += 'n';
+            
+            // Emoji kalender yang sudah diperbarui
+            document.getElementById('date-read-text').innerText = `📅 Datum: dem ${dayRead} ${monthName}`;
+
+            const timeReads = getGermanTimeRead(hours, minutes);
+            document.getElementById('time-read-text').innerText = `⏰ Formal: ${timeReads.formal} | Informal: ${timeReads.informal}`;
+        }
+
+        updateWidget();
         setInterval(updateWidget, 1000);
     </script>
-
 </body>
 </html>
