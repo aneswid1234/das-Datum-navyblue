@@ -34,7 +34,6 @@
             padding: 0 10px;
         }
 
-        /* Ukuran huruf besar & di tengah */
         #main-date {
             font-size: clamp(1.6rem, 3.8vw, 2.8rem);
             white-space: nowrap;
@@ -67,6 +66,36 @@
         const numbersOrdinal = ["", "erste", "zweite", "dritte", "vierte", "fünfte", "sechste", "siebte", "achte", "neunte", "zehnte", "elfte", "zwölfte", "dreizehnte", "vierzehnte", "fünfzehnte", "sechzehnte", "siebzehnte", "achtzehnte", "neunzehnte", "zwanzigste", "einundzwanzigste", "zweiundzwanzigste", "dreiundzwanzigste", "vierundzwanzigste", "fünfundzwanzigste", "sechsundzwanzigste", "siebenundzwanzigste", "achtundzwanzigste", "neunundzwanzigste", "dreißigste", "einunddreißigste"];
 
         const numbersCard = ["null", "eins", "zwei", "drei", "vier", "fünf", "sechs", "sieben", "acht", "neun", "zehn", "elf", "zwölf", "dreizehn", "vierzehn", "fünfzehn", "sechzehn", "siebzehn", "achtzehn", "neunzehn", "zwanzig", "einundzwanzig", "zweiundzwanzig", "dreiundzwanzig", "vierundzwanzig", "fünfundzwanzig", "sechsundzwanzig", "siebenundzwanzig", "achtundzwanzig", "neunundzwanzig", "dreißig", "einunddreißig", "zweiunddreißig", "dreiunddreißig", "vierunddreißig", "fünfunddreißig", "sechsunddreißig", "siebenunddreißig", "achtunddreißig", "neununddreißig", "vierzig", "einundvierzig", "zweiundvierzig", "dreiundvierzig", "vierundvierzig", "fünfundvierzig", "sechsundvierzig", "siebenundvierzig", "achtundvierzig", "neunundvierzig", "fünfzig", "einundfünfzig", "zweiundfünfzig", "dreiundfünfzig", "vierundfünfzig", "fünfundfünfzig", "sechsundfünfzig", "siebenundfünfzig", "achtundfünfzig", "neunundfünfzig"];
+
+        // Fungsi khusus pengucapan tahun dalam bahasa Jerman (Contoh: 2026 -> zweitausendsechsundzwanzig)
+        function getGermanYearRead(year) {
+            let thousands = Math.floor(year / 1000);
+            let remainder = year % 1000;
+            let hundreds = Math.floor(remainder / 100);
+            let tensUnits = remainder % 100;
+
+            let result = "";
+            if (thousands > 0) {
+                result += (thousands === 1 ? "ein" : numbersCard[thousands]) + "tausend";
+            }
+            if (hundreds > 0) {
+                result += numbersCard[hundreds] + "hundert";
+            }
+            if (tensUnits > 0) {
+                let u = tensUnits % 10;
+                let t = Math.floor(tensUnits / 10);
+                if (u === 0) {
+                    result += numbersCard[tensUnits];
+                } else if (t === 0) {
+                    result += numbersCard[u];
+                } else {
+                    let unitsWord = (u === 1 ? "ein" : numbersCard[u]);
+                    let tensWord = ["", "", "zwanzig", "dreißig", "vierzig", "fünfzig", "sechzig", "siebzig", "achtzig", "neunzig"][t];
+                    result += unitsWord + "und" + tensWord;
+                }
+            }
+            return result;
+        }
 
         function getGermanTimeRead(hours, minutes) {
             let formal = `${numbersCard[hours]} Uhr`;
@@ -114,8 +143,9 @@
             else if (day === 8) dayRead = "achten";
             else if (!dayRead.endsWith('n')) dayRead += 'n';
             
-            // Emoji kalender yang sudah diperbarui
-            document.getElementById('date-read-text').innerText = `📅 Datum: dem ${dayRead} ${monthName}`;
+            // Tahun diubah menjadi bentuk ejaan kata-kata bahasa Jerman
+            let yearRead = getGermanYearRead(year);
+            document.getElementById('date-read-text').innerText = `📅 Datum: dem ${dayRead} ${monthName} ${yearRead}`;
 
             const timeReads = getGermanTimeRead(hours, minutes);
             document.getElementById('time-read-text').innerText = `⏰ Formal: ${timeReads.formal} | Informal: ${timeReads.informal}`;
