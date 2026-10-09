@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notion German Date Widget</title>
+    <!-- Menggunakan Google Font yang mirip gaya tulisan tangan di gambar -->
+    <link href="https://fonts.googleapis.com/css2?family=Balsamiq+Sans:wght@700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            /* Transparan agar menyatu rapi dengan background Notion */
+            background-color: transparent; 
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+            /* Mencegah teks turun ke bawah (wajib 1 baris) */
+            white-space: nowrap; 
+        }
+
+        #widget-container {
+            font-family: 'Balsamiq Sans', cursive, sans-serif;
+            /* Warna biru tua sesuai contoh gambar */
+            color: #0d238a; 
+            /* Ukuran font responsif agar aman untuk teks terpanjang sekalipun */
+            font-size: clamp(1rem, 2.5vw, 1.8rem); 
+            letter-spacing: 0.5px;
+            padding: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="widget-container">
+        <span id="date-text">Lade Datum...</span>
+    </div>
+
+    <script>
+        function updateWidget() {
+            const now = new Date();
+
+            // Format Hari (Contoh: Freitag)
+            const optionsWeekday = { weekday: 'long' };
+            const weekday = now.toLocaleDateString('de-DE', optionsWeekday);
+
+            // Format Tanggal (Angka)
+            const day = now.getDate();
+
+            // Format Bulan (Contoh: Oktober / Dezember)
+            const optionsMonth = { month: 'long' };
+            const month = now.toLocaleDateString('de-DE', optionsMonth);
+
+            // Format Tahun
+            const year = now.getFullYear();
+
+            // Format Jam & Menit
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+
+            // Menggabungkan sesuai format bahasa Jerman di gambar: "am Freitag, dem 9. Oktober 2026 um 14:30 Uhr"
+            const finalString = `am ${weekday}, dem ${day}. ${month} ${year} um ${hours}:${minutes} Uhr`;
+
+            // Masukkan ke dalam HTML
+            document.getElementById('date-text').innerText = finalString;
+        }
+
+        // Jalankan saat pertama kali dibuka
+        updateWidget();
+
+        // Update otomatis setiap detik (supaya jamnya jalan terus)
+        setInterval(updateWidget, 1000);
+    </script>
+
+</body>
+</html>
